@@ -1,6 +1,4 @@
 ﻿using Quiz;
-using System.Runtime.Intrinsics.X86;
-using System.Security.Cryptography;
 
 // Powołanie do życia obiektu game - który będzie zarządzał przebiegiem gry
 var game = new Game();
@@ -11,34 +9,72 @@ game.DisplayWelcomeMessage();
 // Zorganizowanie wszystkich pytań w grze
 game.CreateQuestionDatabase();
 
-// Losowanie pytania z najniżej kategorii
-game.DrawQuestionFromCurrentCategory();
-
-// Wyświetlanie aktualnego pytania graczowi
-game.CurrentQuestion.Display();
-
-// Pobranie numeru odpowiedzi od gracza
-var userNumber = Console.ReadLine();
-
-// Sprawdzanie odpowiedzi gracza
-var isCorrect = game.CheckUserAnswer(userNumber);
-
-Console.Clear();
-
-if (isCorrect)
+// TUTAJ
+while(true)
 {
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine(" Brawo, to jest jest poprawna odpowiedź");
+    // Losowanie pytania z bieżącej kategorii
+    game.DrawQuestionFromCurrentCategory();
+
+    // Wyświetlanie aktualnego pytania graczowi
+    game.CurrentQuestion.Display();
+
+    // Pobranie numeru odpowiedzi od gracza
+    var userNumber = Console.ReadLine();
+
+    // Musimy zmusić gracza do wpisania 1, 2, 3 lub 4
+    List<string> acceptedKeys = ["1", "2", "3", "4"];
+
+    while (!acceptedKeys.Contains(userNumber))
+    {
+        Console.Clear();
+        game.CurrentQuestion.Display();
+        userNumber = Console.ReadLine();
+    }
+
+
+    // Sprawdzanie odpowiedzi gracza
+    var isCorrect = game.CheckUserAnswer(userNumber);
+
+    Console.Clear();
+
+    if (isCorrect)
+    {
+        // Dobra odpowiedź
+        game.GoodAnswer();
+        // Sprawdzenie czy to było ostatnie pytanie
+        if (game.CurrentQuestion.Category == 1000)
+        {
+            // Ostatnie pytanie
+            // Gratulacje, ukończyłes/aś cały Quiz
+            game.Success();
+            break;
+        }
+        else
+        {
+            // Podniesienie kategorii na następną
+            game.IncreaseCategory();
+        }
+    }
+    else
+    {
+        // Zła odpowiedź
+        game.FailGameOver();
+        break;
+        // KONIEC PROGRAMU
+    }
 }
-else
+
+
+
+ Console.ReadLine();
+
+
+var warehouse = new List<Product>();
+warehouse.Add(new Product { Barcode = 1, Name = "Masło Extra", Price = 5.5m });
+
+public class Product
 {
-    Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine(" Ups, to niesety nie jest prawidłowa opowiedź ...");
-    Console.WriteLine(" KONIEC GRY");
+    public int Barcode { get; set; }
+    public string Name { get; set; }
+    public decimal Price { get; set; }
 }
-
-
-
-
-
-    Console.ReadLine();

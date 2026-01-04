@@ -15,7 +15,7 @@ public class Question
         Console.WriteLine();
         foreach (var answer in Answers)
         {
-            Console.WriteLine($" {answer.Id}. {answer.Content}");
+            Console.WriteLine($" {answer.Order}. {answer.Content}");
         }
 
         Console.WriteLine();

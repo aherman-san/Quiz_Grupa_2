@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,6 +12,9 @@ public class Game
         CurrentCategory = 100;
     }
 
+
+    decimal price = 3.59m;
+    
     // Aktualna kategoria pytań, z której losujemy pytania
     public int CurrentCategory { get; set; }
 
@@ -19,6 +23,12 @@ public class Game
 
     // Aktualne pytanie, na które gracz odpowiada
     public Question CurrentQuestion { get; set; }
+
+    public List<int> AllCategories { get; set; } = [100, 200, 300, 400, 500, 750, 1000];
+
+    public int CurrentCategoryIndex { get; set; }
+
+    private Random random = new Random();
 
     public void DisplayWelcomeMessage()
     {
@@ -37,70 +47,86 @@ public class Game
 
     public void CreateQuestionDatabase()
     {
-        // Na razie nasza lista wszystkich pytań będzie zawierała tylko dwa pytania, jedno za 100 a drugie za 200;
-        QuestionDatabase = new List<Question>();
-        var p1 = new Question();
-        p1.Id = 1;
-        p1.Category = 100;
-        p1.Content = "Jaki jest kolor nieba?";
-        var a1 = new Answer();
-        a1.Id = 1;
-        a1.Content = "niebieski";
-        a1.IsCorrect = true;
-        p1.Answers.Add(a1);
-
-        var a2 = new Answer();
-        a2.Id = 2;
-        a2.Content = "zielony";
-        p1.Answers.Add(a2);
-
-        var a3 = new Answer();
-        a3.Id = 3;
-        a3.Content = "czerwony";
-        p1.Answers.Add(a3);
-
-        var a4 = new Answer();
-        a4.Id = 4;
-        a4.Content = "zółty";
-        p1.Answers.Add(a4);
-
-
-        QuestionDatabase.Add(p1);
-        //var p2 = new Question();
-        //p2.Id = 2;
-        //p2.Category = 200;
-        //p2.Content = "Jak miał na imię Einstein?";
-        //p2.Answers.Add("Albert");
-        //p2.Answers.Add("Zenek");
-        //p2.Answers.Add("Janek");
-        //p2.Answers.Add("Maciek");
-        //QuestionDatabase.Add(p2);
+        var path = $"{Directory.GetCurrentDirectory()}\\questions.json";
+        var data = File.ReadAllText(path);
+        QuestionDatabase = JsonConvert.DeserializeObject<List<Question>>(data);
     }
 
     public void DrawQuestionFromCurrentCategory()
     {
-        // Na razie losujemy pierwsze pytanie z listy
-        CurrentQuestion = QuestionDatabase[0];
+        var questionsFromCurrentCategory = new List<Question>();
+        foreach (var question in QuestionDatabase)
+        {
+            if (question.Category == CurrentCategory)
+                questionsFromCurrentCategory.Add(question);
+        }
+
+        var index = random.Next(0, questionsFromCurrentCategory.Count);
+        var selectectedQuestion = questionsFromCurrentCategory[index];
+        selectectedQuestion.Answers = selectectedQuestion.Answers.OrderBy(x => random.Next()).ToList();
+        var counter = 1;
+        foreach (var answer in selectectedQuestion.Answers)
+        {
+            answer.Order = counter;
+            counter++;
+        }
+
+
+        CurrentQuestion = selectectedQuestion;
     }
 
     public bool CheckUserAnswer(string userNumber)
     {
-        //// logika w której na podstawie numeru gracza, ustalamy czy odpowiedź jest poprawna lub nie
-        //foreach (var answer in CurrentQuestion.Answers)
-        //{       
-        //    // musimy zamienić odpowiedź gracza na integer
-        //    var userNumberAsInteger = int.Parse(userNumber);
-        //    // nas interesuje ta sytuacja:
-        //    if (userNumberAsInteger == answer.Id)
-        //    {
-        //        return answer.IsCorrect;
-        //    }
-        //}
+        // logika w której na podstawie numeru gracza, ustalamy czy odpowiedź jest poprawna lub nie
+        foreach (var answer in CurrentQuestion.Answers)
+        {
+            // musimy zamienić odpowiedź gracza na integer
+            var userNumberAsInteger = int.Parse(userNumber);
+            // nas interesuje ta sytuacja:
+            if (userNumberAsInteger == answer.Order)
+            {
+                return answer.IsCorrect;
+            }
+        }
 
-        //return false;
+        return false;
 
-        return CurrentQuestion.Answers.First(x => x.Id == int.Parse(userNumber)).IsCorrect;
+        //return CurrentQuestion.Answers.First(x => x.Id == int.Parse(userNumber)).IsCorrect;
+    }
 
+    public void GoodAnswer()
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($" Brawo, to jest poprawna odpowiedź. Wygrałeś/aś {CurrentQuestion.Category} pkt");
+        Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.Write(" Naciśnij ENTER, aby zobaczyć następne pytanie ...");
+        Console.ReadLine();
+        Console.Clear();
+        Console.ForegroundColor = ConsoleColor.White;
+    }
 
+    public void FailGameOver()
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(" Ups, to niesety nie jest prawidłowa opowiedź ...");
+        Console.WriteLine(" KONIEC GRY");
+        Console.ForegroundColor = ConsoleColor.White;
+    }
+
+    public void Success()
+    {
+        Console.Clear();
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($" Brawo, to jest poprawna odpowiedź. Wygrałeś/aś {CurrentQuestion.Category} pkt");
+        Console.Write(" Gratulacje, ukończyłeś/aś cały Quiz !!!");
+        Console.Write(" KONIEC GRY");
+        Console.ForegroundColor = ConsoleColor.White;
+    }
+
+    public void IncreaseCategory()
+    {
+        CurrentCategoryIndex++;
+        CurrentCategory = AllCategories[CurrentCategoryIndex];
     }
 }
