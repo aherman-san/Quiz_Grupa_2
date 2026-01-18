@@ -9,12 +9,16 @@ public class Game
 {
     public Game()
     {
-        CurrentCategory = 100;
+        CreateQuestionDatabase();
+        AllCategories = QuestionDatabase.Select(p => p.Category).OrderBy(c => c).Distinct().ToList();
+        CurrentCategory = AllCategories[0];
+        MaxCategory = AllCategories[AllCategories.Count - 1];
+
     }
 
+    // Kategoria maxymalna
+    public int MaxCategory { get; set; }
 
-    decimal price = 3.59m;
-    
     // Aktualna kategoria pytań, z której losujemy pytania
     public int CurrentCategory { get; set; }
 
@@ -24,7 +28,7 @@ public class Game
     // Aktualne pytanie, na które gracz odpowiada
     public Question CurrentQuestion { get; set; }
 
-    public List<int> AllCategories { get; set; } = [100, 200, 300, 400, 500, 750, 1000];
+    public List<int> AllCategories { get; set; }
 
     public int CurrentCategoryIndex { get; set; }
 

@@ -1,16 +1,17 @@
 ﻿using Quiz;
 
+
 // Powołanie do życia obiektu game - który będzie zarządzał przebiegiem gry
 var game = new Game();
 
 // Wyświetlenie komunikatu powitalnego
 game.DisplayWelcomeMessage();
 
-// Zorganizowanie wszystkich pytań w grze
-game.CreateQuestionDatabase();
+// Zorganizowanie wszystkich pytań w grze przenoszę do konstruktora klasy Game
+
 
 // TUTAJ
-while(true)
+while (true)
 {
     // Losowanie pytania z bieżącej kategorii
     game.DrawQuestionFromCurrentCategory();
@@ -42,7 +43,7 @@ while(true)
         // Dobra odpowiedź
         game.GoodAnswer();
         // Sprawdzenie czy to było ostatnie pytanie
-        if (game.CurrentQuestion.Category == 1000)
+        if (game.CurrentQuestion.Category == game.MaxCategory)
         {
             // Ostatnie pytanie
             // Gratulacje, ukończyłes/aś cały Quiz
@@ -66,15 +67,6 @@ while(true)
 
 
 
- Console.ReadLine();
+Console.ReadLine();
 
 
-var warehouse = new List<Product>();
-warehouse.Add(new Product { Barcode = 1, Name = "Masło Extra", Price = 5.5m });
-
-public class Product
-{
-    public int Barcode { get; set; }
-    public string Name { get; set; }
-    public decimal Price { get; set; }
-}
